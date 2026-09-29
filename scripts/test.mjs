@@ -50,6 +50,11 @@ test('TikTok：没有视频列表时退回热门话题', () => {
   assert.deepEqual(byId.tiktok.parse(raw)[0], { title: '#fyp', hot: 100, url: 'https://www.tiktok.com/tag/fyp' });
 });
 
+test('TikTok：兼容内部接口的下划线字段', () => {
+  const raw = { code: 0, data: { videos: [{ item_id: '123', title: 'v', play_count: 9 }] } };
+  assert.deepEqual(byId.tiktok.parse(raw)[0], { title: 'v', hot: 9, url: 'https://www.tiktok.com/@tiktok/video/123', cover: undefined, author: undefined });
+});
+
 test('YouTube：接口报错时把错误信息抛出来', () => {
   assert.throws(() => byId.youtube.parse({ error: { message: 'API key not valid' } }), /API key not valid/);
 });

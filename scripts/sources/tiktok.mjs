@@ -1,38 +1,61 @@
-import { getText } from '../http.mjs';
+import { request } from '../http.mjs';
 import { REGION } from '../config.mjs';
 
-// TikTok 没有公开的热门接口。这里读 TikTok Creative Center 页面里服务端渲染好的数据
-// （<script id="__NEXT_DATA__">），先试热门视频，不行再用热门话题。属于“尽力而为”。
-const PAGES = [
-  `https://ads.tiktok.com/business/creativecenter/inspiration/popular/pc/en?countryCode=${REGION}&period=7`,
-  `https://ads.tiktok.com/business/creativecenter/inspiration/popular/hashtag/pc/en?countryCode=${REGION}&period=7`,
+// TikTok 没有公开的热门接口，这里依次试 TikTok Creative Center 的几个地址：
+// 先试热门视频，再试热门话题；页面里嵌的 JSON 和它的内部接口都会尝试。属于“尽力而为”。
+const CC = 'https://ads.tiktok.com';
+const ATTEMPTS = [
+  `${CC}/business/creativecenter/inspiration/popular/pc/en?countryCode=${REGION}&period=7`,
+  `${CC}/creative_radar_api/v1/popular_trend/list?period=7&page=1&limit=50&order_by=vv&country_code=${REGION}`,
+  `${CC}/business/creativecenter/inspiration/popular/hashtag/pc/en?countryCode=${REGION}&period=7`,
+  `${CC}/creative_radar_api/v1/popular_trend/hashtag/list?period=7&page=1&limit=50&sort_by=popular&country_code=${REGION}`,
 ];
 
-function nextData(html) {
-  const m = html.match(/<script id="__NEXT_DATA__"[^>]*>([\s\S]*?)<\/script>/);
-  if (!m) throw new Error('页面里没有 __NEXT_DATA__');
-  return JSON.parse(m[1]);
+// 从 HTML 里取出所有内嵌 JSON：<script type="application/json">、__NEXT_DATA__、window.xxx = {...}
+function embeddedJSON(html) {
+  const out = [];
+  for (const [, attrs, body] of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)) {
+    const text = body.trim();
+    const json = /application\/json/.test(attrs) || /^[{[]/.test(text)
+      ? text
+      : text.match(/^window\.[\w$]+\s*=\s*(\{[\s\S]*\})\s*;?$/)?.[1];
+    if (!json) continue;
+    try {
+      out.push(JSON.parse(json));
+    } catch {
+      // 不是合法 JSON，跳过
+    }
+  }
+  return out;
 }
 
-// 在整棵 JSON 里找第一个“像视频列表”或“像话题列表”的数组
+// 在整棵 JSON 里找第一个“每一项都满足 test”的数组
 function findList(node, test) {
   if (Array.isArray(node)) {
-    if (node.length && node.every((x) => x && typeof x === 'object' && test(x))) return node;
+    if (node.length && node.every((x) => x && typeof x === 'object' && !Array.isArray(x) && test(x))) return node;
     for (const x of node) {
       const r = findList(x, test);
       if (r) return r;
     }
   } else if (node && typeof node === 'object') {
-    for (const k of Object.keys(node)) {
-      const r = findList(node[k], test);
+    for (const v of Object.values(node)) {
+      const r = findList(v, test);
       if (r) return r;
     }
   }
   return null;
 }
 
-const isVideo = (x) => 'itemId' in x || 'itemUrl' in x;
-const isHashtag = (x) => 'hashtagName' in x;
+// 页面数据是驼峰命名，内部接口是下划线命名，两种都认
+const isVideo = (x) => ['itemId', 'itemUrl', 'item_id', 'item_url'].some((k) => k in x);
+const isHashtag = (x) => 'hashtagName' in x || 'hashtag_name' in x;
+
+// 失败时说明拿到了什么，方便在 Actions 日志里排查
+function describe(text) {
+  const title = text.match(/<title>([^<]*)<\/title>/)?.[1]?.trim();
+  const ids = [...text.matchAll(/<script[^>]*\bid="([^"]+)"/g)].map((m) => m[1]).slice(0, 5);
+  return `${text.length}字节${title ? ` 标题「${title}」` : ''}${ids.length ? ` script:${ids.join(',')}` : ''}`;
+}
 
 export default {
   id: 'tiktok',
@@ -43,13 +66,16 @@ export default {
 
   async fetch() {
     const errors = [];
-    for (const url of PAGES) {
+    for (const url of ATTEMPTS) {
+      const short = url.replace(CC, '').split('?')[0];
       try {
-        const data = nextData(await getText(url));
-        if (findList(data, isVideo) || findList(data, isHashtag)) return data;
-        errors.push('页面里没找到列表');
+        const text = await (await request(url, { headers: { Referer: `${CC}/business/creativecenter/` } })).text();
+        const candidates = /^\s*[{[]/.test(text) ? [JSON.parse(text)] : embeddedJSON(text);
+        const hit = candidates.find((c) => findList(c, isVideo) || findList(c, isHashtag));
+        if (hit) return hit;
+        errors.push(`${short} 没找到列表（${describe(text)}）`);
       } catch (e) {
-        errors.push(e.message);
+        errors.push(`${short} ${e.message}`);
       }
     }
     throw new Error(errors.join('；'));
@@ -58,21 +84,27 @@ export default {
   parse(raw) {
     const videos = findList(raw, isVideo);
     if (videos) {
-      return videos.map((v) => ({
-        title: v.title || v.desc || '（无标题视频）',
-        hot: v.vv ?? v.playCount ?? v.videoViews,
-        url: v.itemUrl || `https://www.tiktok.com/@tiktok/video/${v.itemId}`,
-        cover: v.cover,
-        author: v.nickName ?? v.author,
-      }));
+      return videos.map((v) => {
+        const id = v.itemId ?? v.item_id;
+        return {
+          title: v.title || v.desc || '（无标题视频）',
+          hot: v.vv ?? v.playCount ?? v.play_count ?? v.videoViews ?? v.video_views,
+          url: v.itemUrl || v.item_url || `https://www.tiktok.com/@tiktok/video/${id}`,
+          cover: v.cover,
+          author: v.nickName ?? v.nickname ?? v.author,
+        };
+      });
     }
     const tags = findList(raw, isHashtag);
     if (tags) {
-      return tags.map((v) => ({
-        title: `#${v.hashtagName}`,
-        hot: v.videoViews ?? v.publishCnt,
-        url: `https://www.tiktok.com/tag/${encodeURIComponent(v.hashtagName)}`,
-      }));
+      return tags.map((v) => {
+        const name = v.hashtagName ?? v.hashtag_name;
+        return {
+          title: `#${name}`,
+          hot: v.videoViews ?? v.video_views ?? v.publishCnt ?? v.publish_cnt,
+          url: `https://www.tiktok.com/tag/${encodeURIComponent(name)}`,
+        };
+      });
     }
     throw new Error('返回格式变了：找不到视频或话题列表');
   },
