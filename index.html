@@ -43,8 +43,25 @@
   <main id="board" class="board"></main>
 
   <footer class="muted">
-    数据每天自动更新一次，来自各平台公开榜单 · 点标题跳到原平台
+    数据每天自动更新一次，来自各平台公开榜单 · 带「▶ 站内播放」「摘要」的点开直接看，其他点标题跳到原平台
   </footer>
+
+  <dialog id="viewer" class="viewer" aria-labelledby="viewer-title">
+    <div class="viewer-head">
+      <span class="dot" id="viewer-dot"></span>
+      <span id="viewer-source" class="muted"></span>
+      <button type="button" id="viewer-close" class="viewer-close" aria-label="关闭">✕</button>
+    </div>
+    <h3 id="viewer-title"></h3>
+    <div id="viewer-meta" class="meta"></div>
+    <div id="viewer-body" class="viewer-body"></div>
+    <div class="viewer-foot">
+      <button type="button" id="viewer-prev">← 上一条</button>
+      <span id="viewer-pos" class="muted"></span>
+      <button type="button" id="viewer-next">下一条 →</button>
+      <a id="viewer-open" class="viewer-open" target="_blank" rel="noopener noreferrer">去原平台 ↗</a>
+    </div>
+  </dialog>
 
   <script src="app.js" defer></script>
 </body>

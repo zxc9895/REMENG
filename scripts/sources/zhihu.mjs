@@ -30,6 +30,7 @@ export default {
         hot: v.detail_text ?? t.metrics_area?.text,
         url: webUrl(t.url ?? t.link?.url),
         cover: v.children?.[0]?.thumbnail || t.image_area?.url,
+        excerpt: t.excerpt ?? t.excerpt_area?.text,
       };
     });
   },

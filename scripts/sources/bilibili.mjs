@@ -65,6 +65,8 @@ export default {
       url: `https://www.bilibili.com/video/${v.bvid}`,
       cover: v.pic,
       author: v.owner?.name,
+      embed: `https://player.bilibili.com/player.html?bvid=${v.bvid}&autoplay=0`,
+      excerpt: v.desc === '-' ? '' : v.desc,
     }));
   },
 };

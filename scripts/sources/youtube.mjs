@@ -30,6 +30,8 @@ export default {
       url: `https://www.youtube.com/watch?v=${v.id}`,
       cover: v.snippet?.thumbnails?.medium?.url ?? v.snippet?.thumbnails?.default?.url,
       author: v.snippet?.channelTitle,
+      embed: `https://www.youtube-nocookie.com/embed/${v.id}`,
+      excerpt: v.snippet?.description,
     }));
   },
 };

@@ -92,6 +92,7 @@ export default {
           url: v.itemUrl || v.item_url || `https://www.tiktok.com/@tiktok/video/${id}`,
           cover: v.cover,
           author: v.nickName ?? v.nickname ?? v.author,
+          embed: id ? `https://www.tiktok.com/embed/v2/${id}` : undefined,
         };
       });
     }

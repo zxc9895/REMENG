@@ -37,7 +37,7 @@ test('微博：备用接口格式', () => {
 test('知乎：api 链接转成网页链接，兼容新格式', () => {
   assert.equal(byId.zhihu.parse(fixture('zhihu'))[0].url, 'https://www.zhihu.com/question/600000');
   const raw = { data: [{ target: { title_area: { text: '新格式' }, link: { url: 'https://www.zhihu.com/question/1' }, metrics_area: { text: '99 万热度' } } }] };
-  assert.deepEqual(byId.zhihu.parse(raw)[0], { title: '新格式', hot: '99 万热度', url: 'https://www.zhihu.com/question/1', cover: undefined });
+  assert.deepEqual(byId.zhihu.parse(raw)[0], { title: '新格式', hot: '99 万热度', url: 'https://www.zhihu.com/question/1', cover: undefined, excerpt: undefined });
 });
 
 test('B站：http 封面转 https；风控时给出错误码', () => {
@@ -52,11 +52,29 @@ test('TikTok：没有视频列表时退回热门话题', () => {
 
 test('TikTok：兼容内部接口的下划线字段', () => {
   const raw = { code: 0, data: { videos: [{ item_id: '123', title: 'v', play_count: 9 }] } };
-  assert.deepEqual(byId.tiktok.parse(raw)[0], { title: 'v', hot: 9, url: 'https://www.tiktok.com/@tiktok/video/123', cover: undefined, author: undefined });
+  assert.deepEqual(byId.tiktok.parse(raw)[0], { title: 'v', hot: 9, url: 'https://www.tiktok.com/@tiktok/video/123', cover: undefined, author: undefined, embed: 'https://www.tiktok.com/embed/v2/123' });
 });
 
 test('YouTube：接口报错时把错误信息抛出来', () => {
   assert.throws(() => byId.youtube.parse({ error: { message: 'API key not valid' } }), /API key not valid/);
+});
+
+test('站内浏览：B站/YouTube/抖音 生成播放器地址，知乎带摘要', () => {
+  const first = (id) => normalize(byId[id].parse(fixture(id)), 5);
+  assert.equal(first('bilibili')[0].embed, 'https://player.bilibili.com/player.html?bvid=BV1xx411c700&autoplay=0');
+  assert.equal(first('bilibili')[4].excerpt, undefined); // B站简介为 “-” 时不显示
+  assert.equal(first('youtube')[0].embed, 'https://www.youtube-nocookie.com/embed/vid00000000');
+  assert.match(first('douyin')[0].embed, /^https:\/\/open\.douyin\.com\/player\/video\?vid=\d+/);
+  assert.equal(first('douyin')[3].embed, undefined); // 没有 group_id 就不生成
+  assert.match(first('zhihu')[0].excerpt, /^知乎示例问题摘要 1/);
+  assert.equal(first('weibo')[0].embed, undefined);
+});
+
+test('normalize：摘要压缩空白并截断，非 https 的播放地址丢弃', () => {
+  const [it] = normalize([{ title: 't', url: 'https://a', excerpt: ` a \n  b ${'x'.repeat(400)}`, embed: 'javascript:alert(1)' }], 1);
+  assert.equal(it.embed, undefined);
+  assert.ok(it.excerpt.startsWith('a b x'));
+  assert.equal(it.excerpt.length, 301);
 });
 
 test('normalize：丢弃无标题/无链接的条目，并重新编号', () => {

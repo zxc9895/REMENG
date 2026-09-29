@@ -54,6 +54,20 @@ function el(tag, props = {}, ...children) {
 // 只放行 http(s) 链接，防止数据里混进 javascript: 之类
 const safeUrl = (u) => (/^https?:\/\//i.test(u || '') ? u : null);
 
+// 站内播放器只允许这些官方嵌入地址
+const EMBED_HOSTS = ['player.bilibili.com', 'www.youtube-nocookie.com', 'open.douyin.com', 'www.tiktok.com'];
+function safeEmbed(u) {
+  try {
+    const x = new URL(u);
+    return x.protocol === 'https:' && EMBED_HOSTS.includes(x.hostname) ? u : null;
+  } catch {
+    return null;
+  }
+}
+// 竖屏视频的平台，播放器按 9:16 显示
+const PORTRAIT = new Set(['douyin', 'tiktok']);
+const canView = (item) => Boolean(safeEmbed(item.embed) || item.excerpt);
+
 function formatHot(hot, unit) {
   if (hot === undefined || hot === null || hot === '') return '';
   if (typeof hot === 'string' && !/^\d+(\.\d+)?$/.test(hot)) return hot; // 已经是“123 万热度”这种文字
@@ -138,7 +152,7 @@ function renderTabs() {
   for (const p of platforms) tabs.append(make(p.id, p.name, COLORS[p.id]));
 }
 
-function renderItem(item, platform) {
+function renderItem(item, platform, list, index) {
   const url = safeUrl(item.url);
   const cover = safeUrl(item.cover);
   const slot = el('div', { class: 'cover-slot' });
@@ -148,18 +162,84 @@ function renderItem(item, platform) {
     slot.append(img);
   }
   const meta = [formatHot(item.hot, platform.unit), item.author].filter(Boolean).join(' · ');
+  const link = el('a', { href: url ?? '#', target: '_blank', rel: 'noopener noreferrer', textContent: item.title, title: item.title });
+  const metaRow = el('div', { class: 'meta' });
+  if (canView(item)) {
+    // 能站内看的：普通点击打开弹窗；按住 Ctrl/⌘ 点击仍然新标签打开原平台
+    const open = (e) => {
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+      e.preventDefault();
+      openViewer(platform, list, index);
+    };
+    link.addEventListener('click', open);
+    slot.addEventListener('click', open);
+    slot.classList.add('clickable');
+    metaRow.append(el('span', { class: 'chip', textContent: safeEmbed(item.embed) ? '▶ 站内播放' : '摘要' }));
+  }
+  if (meta) metaRow.append(meta);
   return el(
     'li',
     {},
     el('span', { class: 'rank', textContent: item.rank }),
     slot,
-    el(
-      'div',
-      { class: 'item-main' },
-      el('a', { href: url ?? '#', target: '_blank', rel: 'noopener noreferrer', textContent: item.title, title: item.title }),
-      meta ? el('div', { class: 'meta', textContent: meta }) : null,
-    ),
+    el('div', { class: 'item-main' }, link, metaRow.childNodes.length ? metaRow : null),
   );
+}
+
+// ---------- 站内查看弹窗 ----------
+const viewer = { platform: null, list: [], index: 0 };
+
+function openViewer(platform, list, index) {
+  Object.assign(viewer, { platform, list, index });
+  renderViewer();
+  if (!$('#viewer').open) $('#viewer').showModal();
+}
+
+function renderViewer() {
+  const { platform: p, list, index } = viewer;
+  const item = list[index];
+  $('#viewer-dot').style.setProperty('--c', COLORS[p.id] ?? 'var(--accent)');
+  $('#viewer-source').textContent = `${p.name} · 第 ${item.rank} 名`;
+  $('#viewer-title').textContent = item.title;
+  $('#viewer-meta').textContent = [formatHot(item.hot, p.unit), item.author].filter(Boolean).join(' · ');
+
+  const body = $('#viewer-body');
+  body.replaceChildren();
+  const src = safeEmbed(item.embed);
+  if (src) {
+    body.append(
+      el(
+        'div',
+        { class: `frame${PORTRAIT.has(p.id) ? ' portrait' : ''}` },
+        el('iframe', {
+          src,
+          title: item.title,
+          allow: 'autoplay; encrypted-media; fullscreen; picture-in-picture',
+          allowFullscreen: true,
+          // YouTube 嵌入需要带来源，这里覆盖页面默认的 no-referrer
+          referrerPolicy: 'strict-origin-when-cross-origin',
+        }),
+      ),
+    );
+  }
+  if (item.excerpt) body.append(el('p', { class: 'excerpt', textContent: item.excerpt }));
+  if (!src && !item.excerpt) {
+    body.append(el('p', { class: 'excerpt muted', textContent: '这一条没有能在站内看的内容，点「去原平台」查看。' }));
+  }
+
+  const url = safeUrl(item.url);
+  $('#viewer-open').href = url ?? '#';
+  $('#viewer-open').hidden = !url;
+  $('#viewer-pos').textContent = `${index + 1} / ${list.length}`;
+  $('#viewer-prev').disabled = index === 0;
+  $('#viewer-next').disabled = index === list.length - 1;
+}
+
+function stepViewer(delta) {
+  const next = viewer.index + delta;
+  if (next < 0 || next >= viewer.list.length) return;
+  viewer.index = next;
+  renderViewer();
 }
 
 function renderCard(p) {
@@ -191,7 +271,7 @@ function renderCard(p) {
   );
 
   if (shown.length) {
-    card.append(el('ol', { class: 'list' }, ...shown.map((it) => renderItem(it, p))));
+    card.append(el('ol', { class: 'list' }, ...shown.map((it, i) => renderItem(it, p, shown, i))));
   } else {
     card.append(el('div', { class: 'empty', textContent: p.error ? `原因：${p.error}` : '暂无数据', title: p.error ?? '' }));
   }
@@ -247,6 +327,23 @@ $('#presets').addEventListener('click', (e) => {
   if (n) setN(n);
 });
 $('#date').addEventListener('change', (e) => loadData(e.target.value));
+
+const dialog = $('#viewer');
+$('#viewer-close').addEventListener('click', () => dialog.close());
+$('#viewer-prev').addEventListener('click', () => stepViewer(-1));
+$('#viewer-next').addEventListener('click', () => stepViewer(1));
+// 点弹窗外面的暗色区域关闭
+dialog.addEventListener('click', (e) => {
+  if (e.target === dialog) dialog.close();
+});
+// 左右方向键切换上一条/下一条（挂在 document 上，焦点在哪都能用）
+document.addEventListener('keydown', (e) => {
+  if (!dialog.open) return;
+  if (e.key === 'ArrowLeft') stepViewer(-1);
+  if (e.key === 'ArrowRight') stepViewer(1);
+});
+// 关掉时移除播放器，视频随之停止
+dialog.addEventListener('close', () => $('#viewer-body').replaceChildren());
 
 renderControls();
 loadDates();

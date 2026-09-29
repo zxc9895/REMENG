@@ -14,7 +14,10 @@ export async function request(url, { headers = {}, ...opts } = {}) {
 export const getJSON = async (url, opts) => (await request(url, opts)).json();
 export const getText = async (url, opts) => (await request(url, opts)).text();
 
-// 统一条目格式：{ rank, title, url, hot, cover?, author? }
+const clip = (s, n) => (s.length > n ? `${s.slice(0, n)}…` : s);
+
+// 统一条目格式：{ rank, title, url, hot, cover?, author?, embed?, excerpt? }
+// embed：站内播放器地址；excerpt：摘要文字。两者都是可选的，有就能在页面里直接看
 export function normalize(list, max) {
   return list
     .filter((it) => it && it.title && it.url)
@@ -24,6 +27,9 @@ export function normalize(list, max) {
       if (it.hot !== undefined && it.hot !== null && it.hot !== '') out.hot = it.hot;
       if (it.cover) out.cover = String(it.cover).replace(/^http:/, 'https:');
       if (it.author) out.author = String(it.author);
+      if (/^https:\/\//.test(it.embed ?? '')) out.embed = it.embed;
+      const excerpt = String(it.excerpt ?? '').replace(/\s+/g, ' ').trim();
+      if (excerpt) out.excerpt = clip(excerpt, 300);
       return out;
     });
 }
