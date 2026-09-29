@@ -193,7 +193,7 @@ function renderCard(p) {
   if (shown.length) {
     card.append(el('ol', { class: 'list' }, ...shown.map((it) => renderItem(it, p))));
   } else {
-    card.append(el('div', { class: 'empty', textContent: p.error ? `原因：${p.error}` : '暂无数据' }));
+    card.append(el('div', { class: 'empty', textContent: p.error ? `原因：${p.error}` : '暂无数据', title: p.error ?? '' }));
   }
 
   const home = safeUrl(p.home);

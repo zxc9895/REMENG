@@ -218,7 +218,16 @@ button[aria-pressed="true"], .tabs a[aria-current="true"] {
 .card-foot a { color: var(--muted); }
 .card-foot a:hover { color: var(--accent); }
 
-.empty { padding: 24px 16px; color: var(--muted); font-size: 14px; }
+.empty {
+  margin: 24px 16px;
+  color: var(--muted);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
 footer { text-align: center; font-size: 12px; padding: 8px 16px 32px; }
 

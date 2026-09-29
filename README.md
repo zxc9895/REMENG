@@ -23,8 +23,8 @@
 **某个平台显示“本次抓取失败，显示 xx 的数据”？**
 那个平台这次没抓到（接口改了或者被限流），会先显示上一次成功的数据，下次定时任务会再试。在 Actions 运行日志里能看到具体原因。
 
-**TikTok 不稳定？**
-TikTok 没有公开的热门接口，这里读的是 TikTok Creative Center 页面里的数据，属于“尽力而为”，可能时好时坏。
+**TikTok 显示“暂时抓不到”？**
+TikTok 没有公开的热门接口。脚本会尝试 TikTok Creative Center 的页面和内部接口，但它现在改成了浏览器端渲染 + 请求签名，普通请求拿不到数据（Actions 日志里能看到具体原因）。要抓得用无头浏览器模拟打开页面，比较重，暂未做。
 
 **YouTube / TikTok 是哪个国家的热门？**
 默认美国（US）。想改：仓库 Settings → Secrets and variables → Actions → Variables → 新建 `REGION`，填 `JP`、`KR`、`TW` 等。
