@@ -1,0 +1,472 @@
+{
+ "status_code": 0,
+ "data": {
+  "word_list": [
+   {
+    "position": 1,
+    "word": "抖音示例热点 1",
+    "hot_value": 12000000,
+    "sentence_id": "2000000"
+   },
+   {
+    "position": 2,
+    "word": "抖音示例热点 2",
+    "hot_value": 11790000,
+    "sentence_id": "2000001",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY2"
+     ]
+    }
+   },
+   {
+    "position": 3,
+    "word": "抖音示例热点 3",
+    "hot_value": 11580000,
+    "sentence_id": "2000002",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY3"
+     ]
+    }
+   },
+   {
+    "position": 4,
+    "word": "抖音示例热点 4",
+    "hot_value": 11370000,
+    "sentence_id": "2000003"
+   },
+   {
+    "position": 5,
+    "word": "抖音示例热点 5",
+    "hot_value": 11160000,
+    "sentence_id": "2000004",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY5"
+     ]
+    }
+   },
+   {
+    "position": 6,
+    "word": "抖音示例热点 6",
+    "hot_value": 10950000,
+    "sentence_id": "2000005",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY6"
+     ]
+    }
+   },
+   {
+    "position": 7,
+    "word": "抖音示例热点 7",
+    "hot_value": 10740000,
+    "sentence_id": "2000006"
+   },
+   {
+    "position": 8,
+    "word": "抖音示例热点 8",
+    "hot_value": 10530000,
+    "sentence_id": "2000007",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY8"
+     ]
+    }
+   },
+   {
+    "position": 9,
+    "word": "抖音示例热点 9",
+    "hot_value": 10320000,
+    "sentence_id": "2000008",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY9"
+     ]
+    }
+   },
+   {
+    "position": 10,
+    "word": "抖音示例热点 10",
+    "hot_value": 10110000,
+    "sentence_id": "2000009"
+   },
+   {
+    "position": 11,
+    "word": "抖音示例热点 11",
+    "hot_value": 9900000,
+    "sentence_id": "2000010",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY11"
+     ]
+    }
+   },
+   {
+    "position": 12,
+    "word": "抖音示例热点 12",
+    "hot_value": 9690000,
+    "sentence_id": "2000011",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY12"
+     ]
+    }
+   },
+   {
+    "position": 13,
+    "word": "抖音示例热点 13",
+    "hot_value": 9480000,
+    "sentence_id": "2000012"
+   },
+   {
+    "position": 14,
+    "word": "抖音示例热点 14",
+    "hot_value": 9270000,
+    "sentence_id": "2000013",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY14"
+     ]
+    }
+   },
+   {
+    "position": 15,
+    "word": "抖音示例热点 15",
+    "hot_value": 9060000,
+    "sentence_id": "2000014",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY15"
+     ]
+    }
+   },
+   {
+    "position": 16,
+    "word": "抖音示例热点 16",
+    "hot_value": 8850000,
+    "sentence_id": "2000015"
+   },
+   {
+    "position": 17,
+    "word": "抖音示例热点 17",
+    "hot_value": 8640000,
+    "sentence_id": "2000016",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY17"
+     ]
+    }
+   },
+   {
+    "position": 18,
+    "word": "抖音示例热点 18",
+    "hot_value": 8430000,
+    "sentence_id": "2000017",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY18"
+     ]
+    }
+   },
+   {
+    "position": 19,
+    "word": "抖音示例热点 19",
+    "hot_value": 8220000,
+    "sentence_id": "2000018"
+   },
+   {
+    "position": 20,
+    "word": "抖音示例热点 20",
+    "hot_value": 8010000,
+    "sentence_id": "2000019",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY20"
+     ]
+    }
+   },
+   {
+    "position": 21,
+    "word": "抖音示例热点 21",
+    "hot_value": 7800000,
+    "sentence_id": "2000020",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY21"
+     ]
+    }
+   },
+   {
+    "position": 22,
+    "word": "抖音示例热点 22",
+    "hot_value": 7590000,
+    "sentence_id": "2000021"
+   },
+   {
+    "position": 23,
+    "word": "抖音示例热点 23",
+    "hot_value": 7380000,
+    "sentence_id": "2000022",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY23"
+     ]
+    }
+   },
+   {
+    "position": 24,
+    "word": "抖音示例热点 24",
+    "hot_value": 7170000,
+    "sentence_id": "2000023",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY24"
+     ]
+    }
+   },
+   {
+    "position": 25,
+    "word": "抖音示例热点 25",
+    "hot_value": 6960000,
+    "sentence_id": "2000024"
+   },
+   {
+    "position": 26,
+    "word": "抖音示例热点 26",
+    "hot_value": 6750000,
+    "sentence_id": "2000025",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY26"
+     ]
+    }
+   },
+   {
+    "position": 27,
+    "word": "抖音示例热点 27",
+    "hot_value": 6540000,
+    "sentence_id": "2000026",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY27"
+     ]
+    }
+   },
+   {
+    "position": 28,
+    "word": "抖音示例热点 28",
+    "hot_value": 6330000,
+    "sentence_id": "2000027"
+   },
+   {
+    "position": 29,
+    "word": "抖音示例热点 29",
+    "hot_value": 6120000,
+    "sentence_id": "2000028",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY29"
+     ]
+    }
+   },
+   {
+    "position": 30,
+    "word": "抖音示例热点 30",
+    "hot_value": 5910000,
+    "sentence_id": "2000029",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY30"
+     ]
+    }
+   },
+   {
+    "position": 31,
+    "word": "抖音示例热点 31",
+    "hot_value": 5700000,
+    "sentence_id": "2000030"
+   },
+   {
+    "position": 32,
+    "word": "抖音示例热点 32",
+    "hot_value": 5490000,
+    "sentence_id": "2000031",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY32"
+     ]
+    }
+   },
+   {
+    "position": 33,
+    "word": "抖音示例热点 33",
+    "hot_value": 5280000,
+    "sentence_id": "2000032",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY33"
+     ]
+    }
+   },
+   {
+    "position": 34,
+    "word": "抖音示例热点 34",
+    "hot_value": 5070000,
+    "sentence_id": "2000033"
+   },
+   {
+    "position": 35,
+    "word": "抖音示例热点 35",
+    "hot_value": 4860000,
+    "sentence_id": "2000034",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY35"
+     ]
+    }
+   },
+   {
+    "position": 36,
+    "word": "抖音示例热点 36",
+    "hot_value": 4650000,
+    "sentence_id": "2000035",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY36"
+     ]
+    }
+   },
+   {
+    "position": 37,
+    "word": "抖音示例热点 37",
+    "hot_value": 4440000,
+    "sentence_id": "2000036"
+   },
+   {
+    "position": 38,
+    "word": "抖音示例热点 38",
+    "hot_value": 4230000,
+    "sentence_id": "2000037",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY38"
+     ]
+    }
+   },
+   {
+    "position": 39,
+    "word": "抖音示例热点 39",
+    "hot_value": 4020000,
+    "sentence_id": "2000038",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY39"
+     ]
+    }
+   },
+   {
+    "position": 40,
+    "word": "抖音示例热点 40",
+    "hot_value": 3810000,
+    "sentence_id": "2000039"
+   },
+   {
+    "position": 41,
+    "word": "抖音示例热点 41",
+    "hot_value": 3600000,
+    "sentence_id": "2000040",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY41"
+     ]
+    }
+   },
+   {
+    "position": 42,
+    "word": "抖音示例热点 42",
+    "hot_value": 3390000,
+    "sentence_id": "2000041",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY42"
+     ]
+    }
+   },
+   {
+    "position": 43,
+    "word": "抖音示例热点 43",
+    "hot_value": 3180000,
+    "sentence_id": "2000042"
+   },
+   {
+    "position": 44,
+    "word": "抖音示例热点 44",
+    "hot_value": 2970000,
+    "sentence_id": "2000043",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY44"
+     ]
+    }
+   },
+   {
+    "position": 45,
+    "word": "抖音示例热点 45",
+    "hot_value": 2760000,
+    "sentence_id": "2000044",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY45"
+     ]
+    }
+   },
+   {
+    "position": 46,
+    "word": "抖音示例热点 46",
+    "hot_value": 2550000,
+    "sentence_id": "2000045"
+   },
+   {
+    "position": 47,
+    "word": "抖音示例热点 47",
+    "hot_value": 2340000,
+    "sentence_id": "2000046",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY47"
+     ]
+    }
+   },
+   {
+    "position": 48,
+    "word": "抖音示例热点 48",
+    "hot_value": 2130000,
+    "sentence_id": "2000047",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY48"
+     ]
+    }
+   },
+   {
+    "position": 49,
+    "word": "抖音示例热点 49",
+    "hot_value": 1920000,
+    "sentence_id": "2000048"
+   },
+   {
+    "position": 50,
+    "word": "抖音示例热点 50",
+    "hot_value": 1710000,
+    "sentence_id": "2000049",
+    "word_cover": {
+     "url_list": [
+      "https://placehold.co/160x90/fe2c55/fff?text=DY50"
+     ]
+    }
+   }
+  ]
+ }
+}

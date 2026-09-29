@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>每日热榜</title>
+  <meta name="description" content="每天汇总抖音、B站、微博、知乎、YouTube、TikTok 热榜，自己调节看前几名">
+  <!-- 不发送 Referer，否则 B站/抖音 的封面图会被防盗链拦截 -->
+  <meta name="referrer" content="no-referrer">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔥</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div class="brand">
+      <h1>每日热榜</h1>
+      <p id="updated" class="muted">加载中…</p>
+    </div>
+    <label class="date">
+      <span class="muted">日期</span>
+      <select id="date"><option value="latest">最新</option></select>
+    </label>
+  </header>
+
+  <section class="controls" aria-label="筛选">
+    <div class="topn">
+      <label for="n-range">看前</label>
+      <input type="range" id="n-range" min="1" max="50" value="10">
+      <input type="number" id="n-num" min="1" max="50" value="10" inputmode="numeric" aria-label="名次">
+      <span>名</span>
+      <div class="presets" id="presets">
+        <button type="button" data-n="3">3</button>
+        <button type="button" data-n="5">5</button>
+        <button type="button" data-n="10">10</button>
+        <button type="button" data-n="20">20</button>
+        <button type="button" data-n="50">50</button>
+      </div>
+    </div>
+    <nav id="tabs" class="tabs" aria-label="平台"></nav>
+  </section>
+
+  <p id="notice" class="notice" hidden></p>
+  <main id="board" class="board"></main>
+
+  <footer class="muted">
+    数据每天自动更新一次，来自各平台公开榜单 · 点标题跳到原平台
+  </footer>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+{
+  "name": "remeng",
+  "private": true,
+  "type": "module",
+  "description": "每日热榜 TopN：抖音 / B站 / 微博 / 知乎 / YouTube / TikTok",
+  "scripts": {
+    "fetch": "node scripts/fetch.mjs",
+    "mock": "node scripts/fetch.mjs --mock",
+    "test": "node scripts/test.mjs",
+    "serve": "python3 -m http.server 8080"
+  },
+  "engines": { "node": ">=20" }
+}

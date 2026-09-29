@@ -1,0 +1,69 @@
+name: 更新热榜
+
+on:
+  schedule:
+    - cron: '0 0 * * *' # 每天 UTC 0 点 = 北京时间 8 点（GitHub 高峰期可能延迟几十分钟）
+  workflow_dispatch: # 允许在 Actions 页面手动点“Run workflow”
+  push:
+    paths-ignore:
+      - 'data/**'
+      - '**.md'
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: update-hot
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: 测试解析逻辑
+        run: node scripts/test.mjs
+
+      - name: 抓取热榜
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          ZHIHU_COOKIE: ${{ secrets.ZHIHU_COOKIE }}
+          REGION: ${{ vars.REGION || 'US' }}
+        run: node scripts/fetch.mjs
+
+      - name: 提交数据
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          if git diff --cached --quiet; then echo "数据没有变化"; exit 0; fi
+          git commit -m "chore: 更新热榜数据 $(TZ=Asia/Shanghai date +'%F %H:%M')"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"
+
+  deploy:
+    needs: fetch
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }} # 取最新提交，包含刚抓到的数据
+      - uses: actions/configure-pages@v5
+      - name: 整理要发布的文件
+        run: |
+          mkdir _site
+          cp -r index.html style.css app.js data _site/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+      - id: deployment
+        uses: actions/deploy-pages@v4
