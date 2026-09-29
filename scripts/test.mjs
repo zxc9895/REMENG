@@ -59,13 +59,12 @@ test('YouTube：接口报错时把错误信息抛出来', () => {
   assert.throws(() => byId.youtube.parse({ error: { message: 'API key not valid' } }), /API key not valid/);
 });
 
-test('站内浏览：B站/YouTube/抖音 生成播放器地址，知乎带摘要', () => {
+test('站内浏览：B站/YouTube 生成播放器地址，知乎带摘要，抖音不做站内播放', () => {
   const first = (id) => normalize(byId[id].parse(fixture(id)), 5);
   assert.equal(first('bilibili')[0].embed, 'https://player.bilibili.com/player.html?bvid=BV1xx411c700&autoplay=0');
   assert.equal(first('bilibili')[4].excerpt, undefined); // B站简介为 “-” 时不显示
   assert.equal(first('youtube')[0].embed, 'https://www.youtube-nocookie.com/embed/vid00000000');
-  assert.match(first('douyin')[0].embed, /^https:\/\/open\.douyin\.com\/player\/video\?vid=\d+/);
-  assert.equal(first('douyin')[3].embed, undefined); // 没有 group_id 就不生成
+  assert.equal(first('douyin')[0].embed, undefined);
   assert.match(first('zhihu')[0].excerpt, /^知乎示例问题摘要 1/);
   assert.equal(first('weibo')[0].embed, undefined);
 });

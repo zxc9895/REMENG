@@ -35,8 +35,13 @@ const clampN = (v) => Math.min(MAX_N, Math.max(1, Math.round(Number(v)) || 10));
 const state = {
   n: clampN(store.get('topN', 10)),
   tab: store.get('tab', 'all'),
+  date: 'latest', // 'latest' 或 'YYYY-MM-DD'
   data: null,
 };
+
+// GitHub Actions 每小时第 17 分钟抓一次（见 .github/workflows/update.yml）
+const RUN_MINUTE = 17;
+const AUTO_CHECK_MS = 10 * 60 * 1000;
 
 // ---------- 小工具 ----------
 function el(tag, props = {}, ...children) {
@@ -55,7 +60,7 @@ function el(tag, props = {}, ...children) {
 const safeUrl = (u) => (/^https?:\/\//i.test(u || '') ? u : null);
 
 // 站内播放器只允许这些官方嵌入地址
-const EMBED_HOSTS = ['player.bilibili.com', 'www.youtube-nocookie.com', 'open.douyin.com', 'www.tiktok.com'];
+const EMBED_HOSTS = ['player.bilibili.com', 'www.youtube-nocookie.com', 'www.tiktok.com'];
 function safeEmbed(u) {
   try {
     const x = new URL(u);
@@ -65,7 +70,7 @@ function safeEmbed(u) {
   }
 }
 // 竖屏视频的平台，播放器按 9:16 显示
-const PORTRAIT = new Set(['douyin', 'tiktok']);
+const PORTRAIT = new Set(['tiktok']);
 const canView = (item) => Boolean(safeEmbed(item.embed) || item.excerpt);
 
 function formatHot(hot, unit) {
@@ -77,6 +82,23 @@ function formatHot(hot, unit) {
   return unit ? `${text} ${unit}` : text;
 }
 
+function timeAgo(iso) {
+  const min = Math.floor((Date.now() - new Date(iso).getTime()) / 60000);
+  if (!Number.isFinite(min)) return '';
+  if (min < 1) return '刚刚';
+  if (min < 60) return `${min} 分钟前`;
+  if (min < 1440) return `${Math.floor(min / 60)} 小时前`;
+  return `${Math.floor(min / 1440)} 天前`;
+}
+
+// 下一次定时抓取的大概时间（本地时间 hh:mm）
+function nextRunText() {
+  const t = new Date();
+  if (t.getMinutes() >= RUN_MINUTE) t.setHours(t.getHours() + 1);
+  t.setMinutes(RUN_MINUTE, 0, 0);
+  return t.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
+}
+
 function formatTime(iso) {
   if (!iso) return '';
   const d = new Date(iso);
@@ -85,23 +107,29 @@ function formatTime(iso) {
 }
 
 // ---------- 数据 ----------
-async function loadJSON(url) {
-  const res = await fetch(url, { cache: 'no-cache' });
+// fresh：加时间戳绕过 GitHub Pages 的缓存，保证拿到服务器上最新的文件
+async function loadJSON(url, fresh = false) {
+  const res = await fetch(fresh ? `${url}?t=${Date.now()}` : url, { cache: fresh ? 'no-store' : 'no-cache' });
   if (!res.ok) throw new Error(`${res.status}`);
   return res.json();
 }
 
-async function loadDates() {
+async function loadDates(fresh = false) {
   try {
-    const dates = await loadJSON('data/history/index.json');
+    const dates = await loadJSON('data/history/index.json', fresh);
     const select = $('#date');
-    for (const d of dates) select.append(el('option', { value: d, textContent: d }));
+    select.replaceChildren(
+      el('option', { value: 'latest', textContent: '最新' }),
+      ...dates.map((d) => el('option', { value: d, textContent: d })),
+    );
+    select.value = state.date;
   } catch {
     // 还没有历史数据
   }
 }
 
 async function loadData(date) {
+  state.date = date;
   const url = date === 'latest' ? 'data/latest.json' : `data/history/${date}.json`;
   try {
     state.data = await loadJSON(url);
@@ -115,7 +143,7 @@ async function loadData(date) {
 function renderHeader() {
   const d = state.data;
   $('#updated').textContent = d
-    ? `数据日期 ${d.date} · 抓取于 ${formatTime(d.generatedAt)}`
+    ? `数据日期 ${d.date} · 抓取于 ${formatTime(d.generatedAt)}（${timeAgo(d.generatedAt)}）`
     : '暂无数据';
 
   const notice = $('#notice');
@@ -327,6 +355,56 @@ $('#presets').addEventListener('click', (e) => {
   if (n) setN(n);
 });
 $('#date').addEventListener('change', (e) => loadData(e.target.value));
+
+// ---------- 刷新 ----------
+// silent：后台自动检查，只在正在看“最新”时才替换数据，不打扰用户
+async function refreshLatest({ silent = false } = {}) {
+  const btn = $('#refresh');
+  const msg = $('#refresh-msg');
+  if (!silent) {
+    btn.disabled = true;
+    btn.textContent = '刷新中…';
+    msg.textContent = '';
+  }
+  const before = state.date === 'latest' ? state.data?.generatedAt : null;
+  try {
+    const fresh = await loadJSON('data/latest.json', true);
+    const changed = fresh.generatedAt !== before;
+    if (!silent || (state.date === 'latest' && changed)) {
+      state.date = 'latest';
+      $('#date').value = 'latest';
+      state.data = fresh;
+      render();
+      loadDates(true);
+    }
+    if (!silent) {
+      msg.textContent = changed
+        ? `已更新到 ${formatTime(fresh.generatedAt)} 的排行`
+        : `已经是最新，下次更新约 ${nextRunText()}`;
+    } else if (state.date === 'latest' && changed) {
+      msg.textContent = `已自动更新到 ${formatTime(fresh.generatedAt)} 的排行`;
+    }
+  } catch {
+    if (!silent) msg.textContent = '刷新失败，请检查网络后再试';
+  }
+  if (state.date === 'latest') renderHeader(); // 让“xx 分钟前”保持准确
+  if (!silent) {
+    btn.disabled = false;
+    btn.textContent = '↻ 刷新';
+  }
+}
+
+$('#refresh').addEventListener('click', () => refreshLatest());
+
+// 页面开着时每 10 分钟自动检查一次；从后台切回来时也检查
+let lastCheck = Date.now();
+function autoCheck() {
+  if (document.visibilityState !== 'visible' || Date.now() - lastCheck < AUTO_CHECK_MS / 2) return;
+  lastCheck = Date.now();
+  refreshLatest({ silent: true });
+}
+setInterval(autoCheck, AUTO_CHECK_MS);
+document.addEventListener('visibilitychange', autoCheck);
 
 const dialog = $('#viewer');
 $('#viewer-close').addEventListener('click', () => dialog.close());

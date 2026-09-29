@@ -14,7 +14,11 @@
   <header class="top">
     <div class="brand">
       <h1>每日热榜</h1>
-      <p id="updated" class="muted">加载中…</p>
+      <div class="updated-row">
+        <p id="updated" class="muted">加载中…</p>
+        <button type="button" id="refresh" title="获取最新一次抓取的排行">↻ 刷新</button>
+        <span id="refresh-msg" class="muted" role="status"></span>
+      </div>
     </div>
     <label class="date">
       <span class="muted">日期</span>
@@ -43,7 +47,7 @@
   <main id="board" class="board"></main>
 
   <footer class="muted">
-    数据每天自动更新一次，来自各平台公开榜单 · 带「▶ 站内播放」「摘要」的点开直接看，其他点标题跳到原平台
+    数据每小时自动更新，来自各平台公开榜单 · 带「▶ 站内播放」「摘要」的点开直接看，其他点标题跳到原平台
   </footer>
 
   <dialog id="viewer" class="viewer" aria-labelledby="viewer-title">

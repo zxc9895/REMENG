@@ -2,7 +2,7 @@ name: 更新热榜
 
 on:
   schedule:
-    - cron: '0 0 * * *' # 每天 UTC 0 点 = 北京时间 8 点（GitHub 高峰期可能延迟几十分钟）
+    - cron: '17 * * * *' # 每小时第 17 分钟跑一次（避开整点高峰；GitHub 繁忙时可能延迟）
   workflow_dispatch: # 允许在 Actions 页面手动点“Run workflow”
   push:
     paths-ignore:
@@ -19,16 +19,22 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  fetch:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
         with:
           node-version: 22
+      - id: pages
+        uses: actions/configure-pages@v5
 
       - name: 测试解析逻辑
         run: node scripts/test.mjs
+
+      # 数据每小时更新，但一天只提交一次到仓库，所以先从线上网站取回最新的一份
+      - name: 取回上次的数据
+        run: node scripts/restore.mjs "${{ steps.pages.outputs.base_url }}"
 
       - name: 抓取热榜
         env:
@@ -37,8 +43,13 @@ jobs:
           REGION: ${{ vars.REGION || 'US' }}
         run: node scripts/fetch.mjs
 
-      - name: 提交数据
+      # 每天北京时间 23 点那次（或手动/推送触发时）把数据存进仓库备份
+      - name: 提交数据（每天一次）
         run: |
+          hour=$(TZ=Asia/Shanghai date +%H)
+          if [ "$GITHUB_EVENT_NAME" = "schedule" ] && [ "$hour" != "23" ]; then
+            echo "北京时间 ${hour} 点，只更新网站，不提交"; exit 0
+          fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add data
@@ -47,23 +58,24 @@ jobs:
           git pull --rebase origin "$GITHUB_REF_NAME"
           git push origin "HEAD:$GITHUB_REF_NAME"
 
+      # 给 app.js / style.css 加版本号，代码更新后浏览器会直接拿新版，不用强制刷新
+      - name: 整理要发布的文件
+        run: |
+          mkdir _site
+          cp -r index.html style.css app.js data _site/
+          v=${GITHUB_SHA::7}
+          sed -i "s|href=\"style.css\"|href=\"style.css?v=$v\"|; s|src=\"app.js\"|src=\"app.js?v=$v\"|" _site/index.html
+          grep -o '\(style.css\|app.js\)?v=[0-9a-f]*' _site/index.html
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
   deploy:
-    needs: fetch
+    needs: build
     runs-on: ubuntu-latest
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v5
-        with:
-          ref: ${{ github.ref_name }} # 取最新提交，包含刚抓到的数据
-      - uses: actions/configure-pages@v5
-      - name: 整理要发布的文件
-        run: |
-          mkdir _site
-          cp -r index.html style.css app.js data _site/
-      - uses: actions/upload-pages-artifact@v4
-        with:
-          path: _site
       - id: deployment
         uses: actions/deploy-pages@v4

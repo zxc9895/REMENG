@@ -30,9 +30,8 @@ export default {
       title: v.word,
       hot: v.hot_value,
       url: `https://www.douyin.com/hot/${v.sentence_id}`,
+      // 抖音的嵌入播放器在外部网站放不出来（黑屏），所以抖音不做站内播放，点开直接跳转
       cover: v.word_cover?.url_list?.[0],
-      // group_id 是这个热点的代表视频，用抖音官方嵌入播放器在站内播放
-      embed: v.group_id ? `https://open.douyin.com/player/video?vid=${v.group_id}&autoplay=0` : undefined,
     }));
   },
 };
